@@ -1,0 +1,41 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: ['feature/**']
+    paths: ['src/**', 'package*.json']
+  pull_request:
+    branches: [main]
+    paths: ['src/**', 'package*.json']
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Phase 1 - Install
+        run: npm ci
+
+      - name: Phase 2 - Lint
+        run: npm run lint
+
+      - name: Phase 3 - Test
+        run: npm test
+
+      - name: Phase 4 - Build
+        run: npm run build
+
+      - name: Archive dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 5
